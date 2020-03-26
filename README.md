@@ -1,5 +1,5 @@
 # lecture-scraper
-Lecture Scraper
+A program to download and organise lecture notes
 
 # Setup
 * Download/clone this repository
