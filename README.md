@@ -5,6 +5,13 @@ Lecture Scraper
 * Download/clone this repository
 * Download chromedriver https://chromedriver.chromium.org/downloads
 * Unzip the directory and move the chromedriver file the the lecture-scraper-master directory 
+    *```bash
+    lecture-scraper-master
+      ├── README.md
+      ├── chromedriver
+      ├── lecture_scraper.py
+      └── requirements.txt
+     ```
 * Open the terminal/command line and cd into the lecture-scraper-master directory and run the following command to install dependencies
     * if pip not installed https://pip.pypa.io/en/stable/installing/
     * ```
