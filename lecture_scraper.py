@@ -17,7 +17,6 @@ class LectureScraper():
         except:
             print('Please save the chromedriver executable in this directory')
             quit()
-        self.driver.minimize_window()
         self.driver.get('https://ucc.instructure.com/')
         self.login(student_num, password)
         print('\nLogging in to Canvas\n')
