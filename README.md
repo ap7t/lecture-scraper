@@ -11,7 +11,7 @@ Lecture Scraper
       ├── chromedriver
       ├── lecture_scraper.py
       └── requirements.txt
-     ```
+      ```
 * Open the terminal/command line and cd into the lecture-scraper-master directory and run the following command to install dependencies
     * if pip not installed https://pip.pypa.io/en/stable/installing/
     * ```
