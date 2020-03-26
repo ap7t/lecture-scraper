@@ -5,8 +5,8 @@ Lecture Scraper
 * Download/clone this repository
 * Download chromedriver https://chromedriver.chromium.org/downloads
 * Unzip the directory and move the chromedriver file the the lecture-scraper-master directory 
-    *```
-     lecture-scraper-master
+    * ```
+      lecture-scraper-master
       ├── README.md
       ├── chromedriver
       ├── lecture_scraper.py
