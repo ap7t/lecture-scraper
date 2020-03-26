@@ -15,7 +15,10 @@ class LectureScraper():
         try:
             self.driver = webdriver.Chrome(cwd / 'chromedriver', options=options)
         except:
-            print('Please save the chromedriver executable in this directory')
+            try:
+                self.driver = webdriver.Chrome(cwd / 'chromedriver.exe', options=options)
+            except:
+                print('Please save the chromedriver executable in this directory')
             quit()
         self.driver.get('https://ucc.instructure.com/')
         self.login(student_num, password)
