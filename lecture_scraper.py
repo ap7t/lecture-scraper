@@ -3,8 +3,6 @@ import getpass, re, requests
 from queue import Queue
 from pathlib import Path
 
-
-
 class LectureScraper():
     def __init__(self):
         student_num, password = self.get_user_details()
@@ -133,7 +131,6 @@ class LectureScraper():
                     moved = False
                 else:
                     moved = True
-                
             except:
                 pass
                  
@@ -161,5 +158,3 @@ class LectureScraper():
 if __name__ == "__main__":
     b = LectureScraper()
     b.scrape()
-
-    
