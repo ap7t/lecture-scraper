@@ -13,13 +13,14 @@ class LectureScraper():
         options = webdriver.ChromeOptions()
         options.add_experimental_option('prefs', prefs)
         try:
-            self.driver = webdriver.Chrome(cwd / 'chromedriver', options=options)
+            self.driver = webdriver.Chrome(str(cwd / 'chromedriver'), options=options)
         except:
             try:
-                self.driver = webdriver.Chrome(cwd / 'chromedriver.exe', options=options)
+                self.driver = webdriver.Chrome(str(cwd / 'chromedriver.exe'), options=options)
             except:
                 print('Please save the chromedriver executable in this directory')
                 quit()
+        self.driver.minimize_window()
         self.driver.get('https://ucc.instructure.com/')
         self.login(student_num, password)
         print('\nLogging in to Canvas\n')
@@ -120,9 +121,9 @@ class LectureScraper():
 
         path = self.save_location / file
         new_path = self.save_location / directory  / file
-        downloaded = moved = False
+        donwnloaded = moved = False
 
-        while not downloaded and not moved:
+        while not donwnloaded and not moved:
             try:
                 path.rename(new_path)
                 downloaded = True
@@ -130,6 +131,7 @@ class LectureScraper():
                     moved = False
                 else:
                     moved = True
+                
             except:
                 pass
                  
