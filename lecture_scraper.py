@@ -53,6 +53,7 @@ class LectureScraper():
             self.login(student_num, password)
         except:
             pass
+        
     def _download(self, link):
         self.driver.get(link)
         download_lec = self.driver.find_element_by_xpath('//*[@id="content"]/div[1]/span/a')
