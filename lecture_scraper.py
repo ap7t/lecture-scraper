@@ -142,6 +142,9 @@ class LectureScraper():
         ''' Scrape lectures '''
 
         mods = self.get_modules()
+        if not mods:
+            print('Please set Canvas view to card view')
+            quit()
         for mod_code, url in mods.items():
             mod_dir = self.save_location / mod_code 
             print(f'Downloading {mod_code} lectures')
