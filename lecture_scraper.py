@@ -123,9 +123,9 @@ class LectureScraper():
 
         path = self.save_location / file
         new_path = self.save_location / directory  / file
-        donwnloaded = moved = False
+        downloaded = moved = False
 
-        while not donwnloaded and not moved:
+        while not downloaded and not moved:
             try:
                 path.rename(new_path)
                 downloaded = True
