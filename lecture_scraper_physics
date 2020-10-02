@@ -1,0 +1,162 @@
+from selenium import webdriver
+import getpass, re, requests
+from queue import Queue
+from pathlib import Path
+import time
+
+MY_MODULES = ['PY4109']
+MODULE_PREFIXES = "2021-PY"
+
+class LectureScraper():
+    def __init__(self):
+        student_num, password = self.get_user_details() #OBVIOUSLY CHANGE AFTER FINISHED.
+        cwd = Path.cwd()
+        self.save_location =  cwd / 'Lectures' #Make "Lectures" subfolder
+        self.save_location.mkdir(exist_ok=True) #Overwrite directory?
+        prefs = {'download.default_directory': str(self.save_location)} #?
+        options = webdriver.ChromeOptions() #?
+        options.add_experimental_option('prefs', prefs) #?
+        try:
+            self.driver = webdriver.Chrome(str(cwd / 'chromedriver'), options=options)
+        except:
+            try:
+                self.driver = webdriver.Chrome(str(cwd / 'chromedriver.exe'), options=options)
+            except:
+                print('Ensure chromedriver executable that was downloaded is the correct version for whatever version of chrome you are using and that it is in this directory')
+                quit()
+
+        #self.driver.minimize_window()
+        self.driver.get('https://ucc.instructure.com/') #Go to website
+        self.login(student_num, password) #Function to log in to canvas
+        print('\nLogging in to Canvas\n')
+        self.current_mods = MY_MODULES
+        self.recent_downloads = Queue() #?
+
+    def get_user_details(self):
+        ''' Get credentials from user.
+        Asks for student number and password as input. '''
+
+        student_email = input('Enter your student number: ')+"@umail.ucc.ie"
+        password = getpass.getpass('Password to sign into Canvas: ')
+        return student_email, password
+
+    def login(self, student_num, password):
+        ''' Login to canvas '''
+
+        self.driver.implicitly_wait(10)
+        #self.driver.find_elements_by_link_text("117314643@umail.ucc.ie").click()
+        ucc_email_in = self.driver.find_element_by_id('i0116')
+        ucc_email_in.send_keys(student_num)
+        self.driver.implicitly_wait(10)
+
+        #Click button
+        ucc_login_btn = self.driver.find_element_by_id('idSIButton9')
+        ucc_login_btn.click()
+
+        #Fill in password
+        #TODO - I'm getting a stale element error - gets id of button before it changes, then it changes, and when it tries to do something the element is "stale" and no longer accessible.
+        #Sleeping works fine, but there's better ways.
+        time.sleep(1.5)
+        ucc_pass_in = self.driver.find_element_by_id('i0118')
+        ucc_pass_in.send_keys(password)
+
+        #Click login button
+        ucc_login_btn = self.driver.find_element_by_id("idSIButton9")
+        ucc_login_btn.click()
+
+        time.sleep(1.5)
+        ucc_login_btn = self.driver.find_element_by_id("idSIButton9")
+        ucc_login_btn.click()
+        
+    def _download(self, link):
+        self.driver.get(link)
+        download_lec = self.driver.find_element_by_xpath('//*[@id="content"]/div[1]/span/a')
+        download_lec.click()
+        new_name = download_lec.text[9:] # get rid of the 'Download ' in link on canvas
+        self.recent_downloads.put(new_name)
+        
+    def download_lectures(self, mod_code, mod_url):
+        ''' Download all lectures for a module '''
+
+        #Go to course homepage
+        self.driver.get(mod_url)
+
+        #Go to resources page: titled "Modules"
+        #TODO: Put in some sort of error catching.
+        all_links = self.driver.find_elements_by_tag_name("a") #Look at all links on page.
+        modules_link = next(x for x in all_links if x.text=="Modules") #Find a link with the text "Modules"
+        self.driver.get(modules_link.get_attribute("href")) #Go to the Modules page.
+
+        #Go through all of the links of a specified type on the page. These are the possible lecture notes.
+        all_links = self.driver.find_elements_by_tag_name('a')
+
+        #This basically gets the URL where we can click the "download" button
+        #PY4109 module has .exe files that can cause issues. Design choice: do not download them.
+        #Should look at rectifying this in future.
+        lec_links = [link.get_attribute('href') for link in all_links if (link.get_attribute('class') == "ig-title title item_link") and not (re.match(r"(.*)\.exe", link.text))] #get_attribute gets the HTML attribute.
+        for link in lec_links: #Iterate through, and try to download.
+            try:
+                self._download(link)
+            except:
+                pass #If there's no download button, then skip this page.
+
+    def get_modules(self):
+        ''' Return a dictionary of module codes and urls to module page on canvas '''
+
+        mod_dict = {}
+        dash = b.driver.find_element_by_xpath('//*[@id="DashboardCard_Container"]')
+        mods = dash.find_elements_by_tag_name('a')
+        for mod in mods:
+            if re.search(r'^'+MODULE_PREFIXES+r'\d{4}:', mod.text):
+                mod_code = mod.text.split(':')[0][-6:]
+                if mod_code in self.current_mods:
+                    mod_dict.update({mod_code:mod.get_attribute('href')})
+
+        return mod_dict
+
+    def move_file(self, directory, file):
+        ''' Save files into respective module directory'''
+
+        path = self.save_location / file
+        new_path = self.save_location / directory  / file
+        downloaded = moved = False
+
+        while not downloaded and not moved:
+            try:
+                path.rename(new_path)
+                downloaded = True
+                if new_path.stat().st_size == 0:
+                    moved = False
+                else:
+                    moved = True
+                
+            except:
+                pass
+                 
+
+    def scrape(self):
+        ''' Scrape lectures '''
+
+        mods = self.get_modules()
+        if not mods:
+            print('Please set Canvas view to card view')
+            quit()
+        for mod_code, url in mods.items():
+            mod_dir = self.save_location / mod_code 
+            print(f'Downloading {mod_code} lectures')
+            mod_dir.mkdir(exist_ok=True)
+            self.download_lectures(mod_code, url)
+            while not self.recent_downloads.empty():
+                file_to_move = self.recent_downloads.get()
+                self.move_file(mod_code, file_to_move)
+            print(f'{mod_code} lectures saved\n')
+                
+        #self.ken()    
+
+        print(f'\nLectures be saved at {str(self.save_location)}')
+        self.driver.quit()
+
+
+if __name__ == "__main__":
+    b = LectureScraper()
+    b.scrape()
