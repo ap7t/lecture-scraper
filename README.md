@@ -5,7 +5,7 @@ A program to download and organise lecture notes
 * Download/clone this repository
 * Ensure Google Chrome is installed
 * Download chromedriver https://chromedriver.chromium.org/downloads
-    * Unzip and move the chromedriver file the the lecture-scraper-master directory 
+    * Unzip and move the chromedriver file to the lecture-scraper-master directory 
     * ```
       lecture-scraper-master
       ├── README.md
